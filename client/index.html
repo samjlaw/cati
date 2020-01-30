@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Cards Against the Internet</title>
+		<link rel="stylesheet" href="styles/main.css">
+	</head>
+	<body>
+		<div class="cati-wrapper">
+			<ul id="chat-history"></ul>
+			<div class="interface">
+				<div class="chat-wrapper">
+					<form id="chat-form">
+						<input id="chat" title="Chat with your friends!" autocomplete="off"/>
+						<button id="send">Send</button>
+					</form>
+				</div>
+				
+				<div class="card-wrapper">
+					<button id="c1">Card 1</button>
+					<button id="c2">Card 2</button>
+					<button id="c3">Card 3</button>
+					<button id="c4">Card 4</button>
+					<button id="c5">Card 5</button>
+				</div>
+			</div>
+		</div>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="src/client.js"></script>
+	</body>
+</html>

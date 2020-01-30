@@ -1,0 +1,17 @@
+Samuel Law
+CMSC-285 Capstone Senior Project
+
+Inspired by:
+Cards Against Humanity
+
+Technologies Used:
+HTML5
+CSS
+Notepad++
+JavaScript
+Node.JS / NPM
+Express Framework
+Socket.IO Framework
+
+-- Notes to test on localhost:8080 --
+"npm start" or "npm dev" in cmd bash in dir "C:\Users\Sam\Desktop\cati\server" to test server.
