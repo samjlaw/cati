@@ -26,5 +26,5 @@ socket.on('message', (text) => {
 	writeChat(text);
 });
 
-//When button in #chat-form is pressed, do onFormSubmitted function.
+//When button in #chat-form is pressed, do onChatSubmitted function.
 document.querySelector('#chat-form').addEventListener('submit', onChatSubmitted);
