@@ -6,7 +6,7 @@ const socketio = require('socket.io');
 const app = express();
 const client_dir = `${__dirname}/../client`;
 console.log(`Serving static from ${client_dir}`);
-app.use(express.static(clientDir));
+app.use(express.static(client_dir));
 
 const server = http.createServer(app);
 const io = socketio(server);
