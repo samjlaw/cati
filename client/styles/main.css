@@ -19,10 +19,19 @@ button:hover {
 	background-color: black;
 }
 
-.cati-wrapper {
+#card-screen {
+	width: 800px;
+	height: 400px;
+	margin: 50px auto;
+	border: 1px solid lightgray;
+	display: flex;
+	flex-direction: column;
+}
+
+.social-wrapper {
 	width: 450px;
 	height: 400px;
-	margin: 100px auto;
+	margin: 50px auto;
 	border: 1px solid lightgray;
 	border-radius: 2px;
 	display: flex;
