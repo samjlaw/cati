@@ -6,29 +6,41 @@
 		<link rel="stylesheet" href="styles/main.css">
 	</head>
 	<body>
-		<canvas id="card-screen"></canvas>
 	
-		<div class="social-wrapper">
-			<ul id="chat-history"></ul>
-			<div class="interface">
+		<div class="game-screen">
+			<div class="player-wrapper">
+				<li id="leaderboard-title">Players</li>
+				<div id="players">
+					<ul id="leaderboard"></ul>
+				</div>
+			</div>
+		
+			<div class="visual-wrapper">
+				<canvas id="card-screen"></canvas>
+			</div>
+	
+			<div class="social-wrapper">
+				<ul id="chat-history"></ul>
 				<div class="chat-wrapper">
 					<form id="chat-form">
-						<input id="chat" title="Chat with your friends!" autocomplete="off"/>
+						<input id="chat" title="Chat with other players!" autocomplete="off"/>
 						<button id="send">Send</button>
 					</form>
 				</div>
-				
-				<div class="card-wrapper">
-					<form id="card-form">
-						<button id="c1"></button>
-						<button id="c2"></button>
-						<button id="c3"></button>
-						<button id="c4"></button>
-						<button id="c5"></button>
-					</form>
-				</div>
 			</div>
+			
+			<div class="card-input">
+				<form id="card-form">
+					<button id="c1">Card 1</button>
+					<button id="c2">Card 2</button>
+					<button id="c3">Card 3</button>
+					<button id="c4">Card 4</button>
+					<button id="c5">Card 5</button>
+				</form>
+			</div>
+			
 		</div>
+		
 		<script src="/socket.io/socket.io.js"></script>
 		<script type="module" src="src/client.js"></script>
 	</body>
