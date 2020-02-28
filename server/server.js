@@ -32,6 +32,7 @@ all_white_cards[11] = 'CATI'
 all_white_cards[12] = 'Hello World!'
 all_white_cards[13] = 'white_cards[13]'
 all_white_cards[14] = 'Don\'t Click This'
+all_white_cards[15] = 'Beep Beep Boop';
 
 //Currently available cards in the current session. Starts off as full as master list.
 var available_cards = all_white_cards.slice();
@@ -47,8 +48,8 @@ io.on('connection', (socket) => {
 	socket.on('message', (text) => {
 		io.emit('message', socket.name + ': ' + text);
 		//debug
-		if (text == 'resubmit') socket.played = false;
-		if (text == 'refresh') available_cards = all_white_cards.slice();
+		if (text == '!resubmit') socket.played = false;
+		if (text == '!refresh') available_cards = all_white_cards.slice();
 	});
 	
 	//If the client hasn't played yet, when client plays a card, send the contents of the card.

@@ -56,7 +56,7 @@ const onCardSubmitted = (event) => {
 			i = 4;
 			break;
 	}
-	if (socket.name != null) socket.emit('action', my_cards[i]);
+	if (socket.name != null && my_cards[i] != null) socket.emit('action', my_cards[i]);
 }
 
 //When receiving a message from the server, do writeChat function.

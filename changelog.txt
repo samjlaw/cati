@@ -1,0 +1,93 @@
+------------------------------------------------------------------
+Jan 30, 2020 Update 1:
+
+First commit.	
+
+------------------------------------------------------------------
+Jan 30, 2020 Update 2:
+
+Added client-server connections. 
+	Clients can send any kind of information to server and vice-versa.
+	Currently only used for chat.
+
+Added chat. 
+	Players can submit messages and view previous chat history for as long as they were connected.
+	Currently no usernames, and therefore messages cannot be differentiated between users.
+
+Added buttons for five cards.
+	Currently serves no purpose.
+
+------------------------------------------------------------------
+Jan 30, 2020 Update 3:
+
+Added basic CSS styling.
+	The only element on screen is a small box for chat history and submission.
+	This is more of a "proof of concept" for the style of the final game, which is very minimalist.
+
+------------------------------------------------------------------
+Jan 31, 2020:
+
+Fixed a typo in server.js that caused a crash.
+
+------------------------------------------------------------------
+Feb 13, 2020:
+
+Improvements to chat system.
+	Players are now required to enter a name before being allowed to talk or play.
+	Names are currently entered via the chat bar. The first message a player sends will set their name.
+	Players cannot choose names that already exist, names that contain spaces or are empty, or names that are too long.
+	Names are not permanent, they become available again when that player leaves the server.
+	Messages are now tagged with player names, therefore messages are no longer anonymous.
+	The server will announce when a player has joined (after they set their name), and when they leave.
+	
+Added basic functionality for white cards.
+	Clicking one of the card buttons will send a message in chat that the user has submitted that card.
+	Each card has a unique value. Cards are predetermined, and are the same five for everyone.
+	Cards are not labelled.
+
+Added canvas.
+	Currently sits above chat.
+	Canvas is currently blank.
+	This is where any potential graphics / animations will be shown.
+
+------------------------------------------------------------------
+Feb 28, 2020 Update 1:
+
+Added leaderboard.
+	Currently connected players will have their names appear on the leaderboard. 
+	Eventually their score will be there too, but not now.
+	When a player leaves, their name is removed from the leaderboard.
+	The leaderboard also alleviates the issue where players don't know what names are taken, since they are all visible now.
+	
+Major overhaul to client interface.
+	The canvas is now front and center, with the leaderboard on the left, chat on the right, and cards underneath.
+	Each entry of chat and leaderboard are now separated by outlines to make it easier to read.
+	Interface now scales based on the window resolution. Everything should be visible without having to scroll!
+	Cards are now bigger (no longer squished under chat), and are now labelled.
+
+Improvements to cards.
+	White cards are now sent to the player from the server, rather than being client-side.
+	The server will randomly choose five cards from the list of available cards to give to the player when they first set their name.
+	Players can only submit one card at a time. If the player tries to submit any more cards after their first, nothing will happen.
+	Currently no system in place for the player to have less than five cards at a time.
+	No changes or updates have been made to black cards.
+
+Added some temporary debugging tools in chat to test cards.
+
+The server no longer announces when an unnamed player leaves.
+
+Fixed an oversight where players could have the same name if different letters were capitalized.
+
+Fixed a few typos in CSS style sheet.
+
+------------------------------------------------------------------
+Feb 28, 2020 Update 2:
+
+Added changelog.
+	Retroactively documented changes from previous updates.
+
+Fixed an issue where players could submit 'null' if they clicked on a blank card. Blank cards currently do nothing.
+
+Minor changes to debug syntax.
+
+------------------------------------------------------------------
