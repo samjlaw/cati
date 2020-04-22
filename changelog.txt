@@ -91,3 +91,34 @@ Fixed an issue where players could submit 'null' if they clicked on a blank card
 Minor changes to debug syntax.
 
 ------------------------------------------------------------------
+Mar 31, 2020:
+
+Added partial support for rooms.
+	Chat messages are only sent to players in the same room.
+	Players in other rooms currently still show up on the leaderboard, and players currently cannot have the same name as another player in a different room.
+	
+Began work on canvas graphics.
+	Currently there is one black card with one prompt that serves as a template for how it may look in the future.
+	
+------------------------------------------------------------------
+Apr 5, 2020:
+
+Improvements to canvas graphics.
+	The middle card (and text) now resizes with resolution scaling, and stays within the boundaries of the canvas.
+	Currently does not keep the same dimensions if the aspect ratio changes.
+	
+------------------------------------------------------------------
+Apr 12, 2020:
+
+Improvements to room support.
+	The room code must now be a 4 digit alphanumerical code, and cannot have spaces.
+	The room code is displayed at the top of the leaderboard, so players can more easily share with their friends.
+	Players are allowed to create their own room codes. If they enter a new code, they are the room creator and will be granted special permissions, otherwise they will just join an existing room.
+	The leaderboard now only displays players in the same room. Additionally, players can pick a unique name in their room, even if it is taken in a different room.
+	
+------------------------------------------------------------------
+Apr 13, 2020:
+
+Fixed an oversight where all rooms shared the same deck of cards, and therefore all rooms ran out of cards very quickly. Card decks are now per-room.
+
+------------------------------------------------------------------

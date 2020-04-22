@@ -64,6 +64,10 @@ button:hover {
 	outline: 1px solid lightgray;
 }
 
+#card-screen {
+	display: block;
+}
+
 .social-wrapper {
 	width: 25%;
 	height: 55vh;
@@ -116,4 +120,5 @@ button:hover {
 	margin: 3vh;
 	display: inline-block;
 	font-size: 1vw;
+	visibility: hidden;
 }
