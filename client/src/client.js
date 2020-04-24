@@ -93,7 +93,6 @@ socket.on('message', (text) => {
 
 //Set the player's name locally if it is allowed by the server.
 socket.on('name_set', (name) => {
-	console.log(socket.name);
 	socket.name = name;
 });
 
@@ -123,13 +122,11 @@ socket.on('create_blackcard', (current_prompt) => {
 
 //Update the list of player names when the player list is updated.
 socket.on('player_update', (clients) => {
-	console.log(clients);
 	const parent = document.querySelector('#leaderboard');
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
 	for (let i = 0; i < clients.length; i++) {
-		console.log(clients[i]);
 		const new_li = document.createElement('li');
 		new_li.textContent = clients[i];
 		parent.appendChild(new_li);

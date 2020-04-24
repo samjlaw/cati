@@ -136,6 +136,7 @@ io.sockets.on('connection', (socket) => {
 			//Give player their name, update the client's list of player names, and create their deck.
 			socket.name = name;
 			socket.score = 0;
+			socket.deck = [];
 			socket.emit('name_set', name);
 			socket.played = false;
 			io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + socket.name + ' has joined the room!');
@@ -227,9 +228,7 @@ io.sockets.on('connection', (socket) => {
 			for (let i = 0; i < socket.deck.length; i++) {
 				returned_cards.push(socket.deck[i].response);
 			}
-			console.log(io.sockets.adapter.rooms[socket.room].available_cards);
 			io.sockets.adapter.rooms[socket.room].available_cards = io.sockets.adapter.rooms[socket.room].available_cards.concat(returned_cards);
-			console.log(io.sockets.adapter.rooms[socket.room].available_cards);
 			player_update(socket.room);
 		}
 	});

@@ -143,3 +143,8 @@ Fixed an issue where players would receive extra blank cards if they have fewer 
 	A previous update removed the functionality of these unintentional blank cards as a temporary measure, but now they don't show up at all.
 
 ------------------------------------------------------------------
+Apr 24, 2020:
+
+Fixed an issue that caused a server crash when a player with no deck would leave their room.
+
+------------------------------------------------------------------
