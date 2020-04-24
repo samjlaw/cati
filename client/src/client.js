@@ -4,10 +4,9 @@ var my_cards = [];
 //Cards that are available to the player once they use one in their deck.
 var available_cards = [];
 
-//List of names of all players currently on server and their scores.
-var names = [];
-var scores = [];
-var current_prompt = 'I go to _____ class.';
+//Blackcard cue and judge name stored locally for resizing purposes.
+var blackcard_txt = '';
+var judge_name = '';
 
 var canvas = document.querySelector('#card-screen');
 canvas.width = canvas.parentNode.clientWidth;
@@ -29,10 +28,13 @@ const onChatSubmitted = (event) => {
 	const text = input.value;
 	input.value = '';
 	if (socket.room == null) {
-		socket.emit('room', text);
+		socket.emit('room_set', text);
 	}
 	else if (socket.name == null) {
 		socket.emit('name_set', text);
+	}
+	else if (text == '!start') {
+		socket.emit('start_game', text);
 	}
 	else {
 		socket.emit('message', text);
@@ -61,17 +63,25 @@ const onCardSubmitted = (event) => {
 			i = 4;
 			break;
 	}
-	if (socket.name != null && my_cards[i] != null) socket.emit('action', my_cards[i]);
+	if (my_cards[i] != null) socket.emit('action', my_cards[i]);
 }
 
-const createBlackCard = (text) => {
+function createBlackCard(text, name) {
+	//Card
 	c.fillRect(canvas.width/2-canvas.width/10, canvas.height/2-canvas.height*.4, canvas.width/5, canvas.height/2);
+	//Cue
 	c.font = (canvas.width/100 * 1.5) + 'px Arial';
 	c.fillStyle = 'white';
 	c.textAlign = 'center';
 	c.fillText(text, canvas.width/2, canvas.height/2-100)
+	//Logo
 	c.font = (canvas.width/100) + 'px Arial';
 	c.fillText('Cards Against the Internet', canvas.width/2-canvas.width/30, canvas.height/2+canvas.height/12);
+	//Judge Name
+	c.font = (canvas.width/100 * 2) + 'px Arial';
+	c.fillStyle = 'black';
+	c.textAlign = 'center';
+	c.fillText('Judge - ' + name, canvas.width/2, canvas.height/15)
 }
 
 //When receiving a message from the server, do writeChat function.
@@ -83,6 +93,7 @@ socket.on('message', (text) => {
 
 //Set the player's name locally if it is allowed by the server.
 socket.on('name_set', (name) => {
+	console.log(socket.name);
 	socket.name = name;
 });
 
@@ -94,23 +105,20 @@ socket.on('room_set', (room) => {
 
 //Set the player's deck when they first join.
 socket.on('create_deck', (available_cards) => {
-	my_cards[0] = available_cards[0];
-	my_cards[1] = available_cards[1];
-	my_cards[2] = available_cards[2];
-	my_cards[3] = available_cards[3];
-	my_cards[4] = available_cards[4];
-	document.querySelector('#c1').textContent = my_cards[0];
-	document.querySelector('#c2').textContent = my_cards[1];
-	document.querySelector('#c3').textContent = my_cards[2];
-	document.querySelector('#c4').textContent = my_cards[3];
-	document.querySelector('#c5').textContent = my_cards[4];
-	document.querySelector('#c1').style.visibility = 'visible';
-	document.querySelector('#c2').style.visibility = 'visible';
-	document.querySelector('#c3').style.visibility = 'visible';
-	document.querySelector('#c4').style.visibility = 'visible';
-	document.querySelector('#c5').style.visibility = 'visible';
-	
-	createBlackCard(current_prompt);
+	for (let i = 0; i < available_cards.length; i++) {
+		my_cards[i] = available_cards[i];
+		document.querySelector('#c'+(i+1)).textContent = my_cards[i].response;
+		document.querySelector('#c'+(i+1)).style.visibility = 'visible';
+	}
+});
+
+socket.on('create_blackcard', (current_prompt) => {
+	c.clearRect(0, 0, canvas.width, canvas.height);
+	canvas.width = canvas.parentNode.clientWidth;
+	canvas.height = canvas.parentNode.clientHeight;
+	createBlackCard(current_prompt.cue, current_prompt.judge);
+	blackcard_txt = current_prompt.cue;
+	judge_name = current_prompt.judge;
 });
 
 //Update the list of player names when the player list is updated.
@@ -146,5 +154,7 @@ window.addEventListener("resize", resizeCanvas, false);
 function resizeCanvas(e) {
 	canvas.width = canvas.parentNode.clientWidth;
 	canvas.height = canvas.parentNode.clientHeight;
-	if (socket.name != null) createBlackCard(current_prompt);
+	if (socket.name != null && blackcard_txt != '') {
+		createBlackCard(blackcard_txt, judge_name);
+	}
 }

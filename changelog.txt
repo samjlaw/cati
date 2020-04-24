@@ -122,3 +122,24 @@ Apr 13, 2020:
 Fixed an oversight where all rooms shared the same deck of cards, and therefore all rooms ran out of cards very quickly. Card decks are now per-room.
 
 ------------------------------------------------------------------
+Apr 22, 2020:
+
+Added asynchronous gameplay aspects.
+	When the room is created, a queue for judges is created. Players are placed in the queue in the order they join the room.
+	Each round will have one judge. Every other player will submit their card to the judge, and the judge will pick their favorite. Whoever submitted the favorite will get a point for that round.
+	There is currently only support for one round at a time. Although the judge for the next round is correctly assigned, they just can't do anything yet.
+	The judge's name is displayed on the client's canvas, and is affected by resolution scaling similarly to the black card.
+	
+------------------------------------------------------------------
+Apr 23, 2020:
+
+Players can no longer join rooms with games in progress.
+
+Rooms can now only have a maximum of six total players.
+
+Cards that go unused by players when they leave the room are now added back to the room's deck for other players to use.
+
+Fixed an issue where players would receive extra blank cards if they have fewer than five options. This also goes for judges choosing their favorite response.
+	A previous update removed the functionality of these unintentional blank cards as a temporary measure, but now they don't show up at all.
+
+------------------------------------------------------------------
