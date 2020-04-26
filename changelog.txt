@@ -148,3 +148,23 @@ Apr 24, 2020:
 Fixed an issue that caused a server crash when a player with no deck would leave their room.
 
 ------------------------------------------------------------------
+Apr 25, 2020:
+
+Added support for multiple rounds.
+	As soon as the judge picks their card for the round, the next judge is selected, and a new round begins with the same rules as before, but with a new judge.
+	All players are given a normal deck when joining, but they aren't able to see it when they are the selected to be the judge.
+	When the next judge is selected, the player's deck is given back to them.
+	Judges still abide by the queue system established in a previous update. When the last connected player ends their round as the judge, the host becomes the judge again, and so on.
+
+Players are now given new cards as soon as they submit their card for the round.
+	If there are no more cards able to be given, then the button is simply removed from the client view.
+	
+Added support for win conditions.
+	At a specified time or condition, the game can declare the final winner based on who has the most points.
+	Currently the only conditions to end a game are when there are no more black cards left to play, or when too many players leave and the game cannot continue.
+	
+The host can no longer start a game with less than 3 players. If players leave mid-game and there are fewer than 3 players at the start of a round, the game will end immediately.
+
+Fixed an issue that caused a server crash when a room would become empty after two or more players leave simultaneously. 
+
+Fixed an issue that caused a server crash when the game attempted to pick a player that previously left the room as the next judge.

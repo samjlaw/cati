@@ -11,7 +11,7 @@ app.use(express.static(client_dir));
 const server = http.createServer(app);
 const io = socketio.listen(server);
 
-//Master list of cards.
+//Master list of cards. There should be 160 white cards.
 var all_white_cards = [];
 all_white_cards[0] = 'Cards Against Humanity';
 all_white_cards[1] = 'Apples to Apples';
@@ -30,13 +30,10 @@ all_white_cards[13] = 'white_cards[13]';
 all_white_cards[14] = 'Don\'t Click This';
 all_white_cards[15] = 'Beep Beep Boop';
 
-//Maser list of all black cards.
+//Maser list of all black cards. There should be 20 black cards.
 var all_black_cards = [];
 all_black_cards[0] = 'I go to _____ class.';
 all_black_cards[1] = 'I don\'t go to _____ class.';
-
-//Currently available cards in the current session. Starts off as full as master list.
-var available_cards = all_white_cards.slice();
 
 //Update the leaderboard of players when a player leaves, or when someone's score changes.
 function player_update(room) {
@@ -53,13 +50,41 @@ function player_update(room) {
 	}
 }
 
-//Set the current room's response numbers to zero, and send a black card with a new prompt.
+//Set the current room's response numbers to zero, clear the judge's cards, and send a black card with a new prompt.
 function start_round(room) {
 	var current_room = io.sockets.adapter.rooms[room];
 	current_room.responses = 0;
-	var current_cue = Math.floor(Math.random() * all_black_cards.length);
-	var round_info = {judge:io.sockets.connected[current_room.judge[0]].name, cue:all_black_cards[current_cue]};
+	current_room.judge_options = [];
+	
+	for (var clientID in current_room.sockets) {
+		var clientSocket = io.sockets.connected[clientID];
+		clientSocket.played = false;
+		if (clientSocket.id == current_room.judge[0]) {
+			io.to(clientSocket.id).emit('clear_deck', clientSocket.deck);
+		}
+	}
+	var current_cue = Math.floor(Math.random() * current_room.black_cards.length);
+	var round_info = {judge:io.sockets.connected[current_room.judge[0]].name, cue:current_room.black_cards[current_cue]};
+	current_room.black_cards.splice(current_cue,1);
 	io.sockets.in(room).emit('create_blackcard', round_info);
+}
+
+//Once all black cards have been played, or some other circumstance causes the game to end, declare the winner.
+function declare_winner(room) {
+	var current_room = io.sockets.adapter.rooms[room];
+	var max_score = {name:'', score:0};
+	for (var clientID in current_room.sockets) {
+		var clientSocket = io.sockets.connected[clientID];
+		io.to(clientSocket.id).emit('clear_deck', clientSocket.deck);
+		if (clientSocket.score > max_score.score) {
+			max_score.name = clientSocket.name;
+			max_score.score = clientSocket.score;
+		}
+	}
+	setTimeout(function() {
+		io.sockets.in(room).emit('message', 'SYSTEM: ' + max_score.name + ' is the winner of the game with ' + max_score.score + ' points!');
+		io.sockets.in(room).emit('display_winner', max_score.name);
+	}, 1000);
 }
 
 //Receiving connection from clients (socket.emit for local, io.emit for server)
@@ -92,7 +117,8 @@ io.sockets.on('connection', (socket) => {
 				if (current_room.length == 1) {
 					socket.host = true;
 					socket.emit('message', 'SYSTEM: You are the host of the "' + room + '" room! Enter your name, and then type "!start" to begin the game.');
-					current_room.available_cards = all_white_cards.slice();
+					current_room.white_cards = all_white_cards.slice();
+					current_room.black_cards = all_black_cards.slice();
 					current_room.responses = [];
 					current_room.judge = [];
 					current_room.judge.push(socket.id);
@@ -137,24 +163,20 @@ io.sockets.on('connection', (socket) => {
 			socket.name = name;
 			socket.score = 0;
 			socket.deck = [];
-			socket.emit('name_set', name);
 			socket.played = false;
+			socket.emit('name_set', name);
 			io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + socket.name + ' has joined the room!');
 			player_update(socket.room);
 			
 			//Randomly generate deck of cards for player from the list of available cards in the room.
-			if (socket.id != current_room.judge[0]) {
-				var player_deck = [];
-				var remaining_cards = 5;
-				if (current_room.available_cards.length < 5) remaining_cards = current_room.available_cards.length;
-				for (let i = 0; i < remaining_cards; i++) {
-					var rand = Math.floor(Math.random() * current_room.available_cards.length);
-					player_deck[i] = {name:socket.name, response:current_room.available_cards[rand]};
-					current_room.available_cards.splice(rand,1);
-				}
-				socket.deck = player_deck;
-				socket.emit('create_deck', player_deck);
+			var remaining_cards = 5;
+			if (current_room.white_cards.length < 5) remaining_cards = current_room.white_cards.length;
+			for (let i = 0; i < remaining_cards; i++) {
+				var rand = Math.floor(Math.random() * current_room.white_cards.length);
+				socket.deck[i] = {name:socket.name, response:current_room.white_cards[rand]};
+				current_room.white_cards.splice(rand,1);
 			}
+			if (socket.id != current_room.judge[0]) socket.emit('create_deck', socket.deck);
 		}
 	});
 	
@@ -163,7 +185,7 @@ io.sockets.on('connection', (socket) => {
 		var current_room = io.sockets.adapter.rooms[socket.room];
 		io.sockets.in(socket.room).emit('message', socket.name + ': ' + text);
 		//debug
-		if (text == '!refresh') current_room.available_cards = all_white_cards.slice();
+		if (text == '!refresh') current_room.white_cards = all_white_cards.slice();
 		if (text == '!giveScore') {
 			socket.score += 1;
 			player_update(socket.room);
@@ -173,12 +195,13 @@ io.sockets.on('connection', (socket) => {
 	//Start the game if the host requests to start. If another player tries to start, don't do anything.
 	socket.on('start_game', (text) => {
 		var current_room = io.sockets.adapter.rooms[socket.room];
-		if (!current_room.playing) {
-			if (socket.id == current_room.judge[0]) {
+		if (!current_room.playing && socket.host) {
+			if (current_room.length > 2) {
 				io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + socket.name + ' is starting the game!');
 				current_room.playing = true;
 				start_round(socket.room);
 			}
+			else io.to(socket.id).emit('message', 'SYSTEM: Sorry, you need at least 3 players to start a game.');
 		}
 	});
 	
@@ -194,11 +217,24 @@ io.sockets.on('connection', (socket) => {
 					player_update(socket.room);
 				}
 			}
+			//Give the current judge their regular deck back.
+			io.to(current_room.judge[0]).emit('clear_deck', current_room.judge_options);
+			io.to(current_room.judge[0]).emit('create_deck', socket.deck);
 			//Move the current judge to the back of the queue and start a new round with a new judge.
 			current_room.judge.shift();
 			current_room.judge.push(socket.id);
-			io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + content.name + ' won the round! ' + io.sockets.connected[current_room.judge[0]].name + ' is the next judge.');
-			start_round(socket.room);
+			if (current_room.length < 3) {
+				io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + content.name + ' won the round! Since there are currently fewer than 3 players, the game must now end.');
+				declare_winner(socket.room);
+			}
+			else if (current_room.black_cards.length == 0) {
+				io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + content.name + ' won the round! All Black Cards have been played, and the game is now ending.');
+				declare_winner(socket.room);
+			}
+			else {
+				io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + content.name + ' won the round! ' + io.sockets.connected[current_room.judge[0]].name + ' is the next judge.');
+				start_round(socket.room);
+			}
 		}
 		//When a player submits their response, add it to the list of responses for the judge. When all responses are collected, send them to the judge.
 		else if (!socket.played && current_room.playing) {
@@ -207,14 +243,24 @@ io.sockets.on('connection', (socket) => {
 			socket.response = content;
 			current_room.responses += 1;
 			
+			//Remove the played card from the player's deck and give them a new one.
+			socket.emit('clear_deck', [socket.response]);
+			var pos = socket.deck.findIndex(x => x.response === content.response);
+			socket.deck.splice(pos,1);
+			if (current_room.white_cards.length > 0)  {
+				var rand = Math.floor(Math.random() * current_room.white_cards.length);
+				socket.deck.push({name:socket.name, response:current_room.white_cards[rand]});
+				current_room.white_cards.splice(rand,1);
+				socket.emit('create_deck', socket.deck);
+			}
+			
 			if (current_room.responses == current_room.length-1) {
 				io.sockets.in(socket.room).emit('message', 'SYSTEM: All responses received! ' + io.sockets.connected[current_room.judge[0]].name + ' is now selecting their favorite response.');
-				var judge_options = [];
 				for (var clientID in current_room.sockets) {
 					var clientSocket = io.sockets.connected[clientID];
-					if (clientSocket.id != current_room.judge[0]) judge_options.push(clientSocket.response);
+					if (clientSocket.id != current_room.judge[0]) current_room.judge_options.push(clientSocket.response);
 				}
-				io.to(current_room.judge[0]).emit('create_deck', judge_options);
+				io.to(current_room.judge[0]).emit('create_deck', current_room.judge_options);
 			}
 		}
 	});
@@ -222,13 +268,17 @@ io.sockets.on('connection', (socket) => {
 	//Let the room know when a player is leaving. Remove the client from the room list.
 	socket.on('disconnect', function() {
 		console.log('A player has disconnected.');
-		if (socket.name != null) {
+		if (socket.name != null && io.sockets.adapter.rooms[socket.room] != null) {
+			var current_room = io.sockets.adapter.rooms[socket.room];
 			io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + socket.name + ' has left the room.');
 			var returned_cards = [];
 			for (let i = 0; i < socket.deck.length; i++) {
 				returned_cards.push(socket.deck[i].response);
 			}
-			io.sockets.adapter.rooms[socket.room].available_cards = io.sockets.adapter.rooms[socket.room].available_cards.concat(returned_cards);
+			current_room.white_cards = io.sockets.adapter.rooms[socket.room].white_cards.concat(returned_cards);
+			console.log(current_room.judge);
+			current_room.judge.splice(current_room.judge.indexOf(socket.id),1);
+			console.log(current_room.judge);
 			player_update(socket.room);
 		}
 	});
