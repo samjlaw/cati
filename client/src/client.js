@@ -4,19 +4,20 @@ var my_cards = [];
 //Cards that are available to the player once they use one in their deck.
 var available_cards = [];
 
-//Blackcard cue and judge name stored locally for resizing purposes.
-var blackcard_txt = '';
-var judge_name = '';
+//Blackcard cue and player names stored locally for resizing purposes.
+var players = [];
+var round_prompt = [];
 var winner_name = '';
 var game_over = false;
 
+//Canvas context for drawing graphics.
 var canvas = document.querySelector('#card-screen');
 canvas.width = canvas.parentNode.clientWidth;
 canvas.height = canvas.parentNode.clientHeight;
 var c = canvas.getContext('2d');
 
 //Create new <li> element in #chat-history to represent chat with given text.
-const writeChat = (text) => {
+const write_chat = (text) => {
 	const parent = document.querySelector('#chat-history');
 	const new_li = document.createElement('li');
 	new_li.textContent = text;
@@ -24,7 +25,7 @@ const writeChat = (text) => {
 };
 
 //Take text from #chat and submit it to server to send to everyone.
-const onChatSubmitted = (event) => {
+const on_chat_submitted = (event) => {
 	event.preventDefault();
 	const input = document.querySelector('#chat');
 	const text = input.value;
@@ -44,7 +45,7 @@ const onChatSubmitted = (event) => {
 };
 
 //Submit the selected card to the server, if the player has entered a name.
-const onCardSubmitted = (event) => {
+const on_card_submitted = (event) => {
 	event.preventDefault();
 	var id = event.target.id;
 	var i;
@@ -68,14 +69,16 @@ const onCardSubmitted = (event) => {
 	if (my_cards[i] != null) socket.emit('action', my_cards[i]);
 }
 
-function createBlackCard(text, name) {
+//Render Black Card, List of players, and their submission status.
+function create_game_view(current_prompt, player_status) {
 	//Card
+	c.fillStyle = 'black';
 	c.fillRect(canvas.width/2-canvas.width/10, canvas.height/2-canvas.height*.4, canvas.width/5, canvas.height/2);
 	//Cue
 	c.font = (canvas.width/100 * 1.5) + 'px Arial';
 	c.fillStyle = 'white';
 	c.textAlign = 'center';
-	c.fillText(text, canvas.width/2, canvas.height/2-100)
+	c.fillText(current_prompt.cue, canvas.width/2, canvas.height/2-100)
 	//Logo
 	c.font = (canvas.width/100) + 'px Arial';
 	c.fillText('Cards Against the Internet', canvas.width/2-canvas.width/30, canvas.height/2+canvas.height/12);
@@ -83,17 +86,45 @@ function createBlackCard(text, name) {
 	c.font = (canvas.width/100 * 2) + 'px Arial';
 	c.fillStyle = 'black';
 	c.textAlign = 'center';
-	c.fillText('Judge - ' + name, canvas.width/2, canvas.height/15);
+	c.fillText('Judge - ' + current_prompt.judge, canvas.width/2, canvas.height/15);
+	
+	//Player Status and Names
+	for (let i = 0; i < player_status.length; i++) {
+		//Status
+		var color = 'red';
+		var outline = '#330000';
+		if (player_status[i].played) {
+			color = 'green';
+			outline = '#003300';
+		}
+		c.beginPath();
+		c.moveTo(canvas.width/6 * (i+1), canvas.height/15*13);
+		c.arc(canvas.width/6 * (i+1), canvas.height/15*13, canvas.width/60, 0, 2*Math.PI);
+		c.fillStyle = color;
+		c.lineWidth = 5;
+		c.strokeStyle = outline;
+		c.stroke();
+		c.fill();
+		c.closePath();
+		
+		//Player Name
+		c.font = (canvas.width/100 * 2) + 'px Arial';
+		c.fillStyle = 'black';
+		c.textAlign = 'center';
+		c.fillText(player_status[i].name, canvas.width/6 * (i+1), canvas.height/15*12);
+	}
 }
 
-function displayWinner(name) {
+//Display a message once the game has ended and the winner is decided.
+function display_winner(name) {
 	c.font = (canvas.width/100 * 5) + 'px Arial';
 	c.fillStyle = 'black';
 	c.textAlign = 'center';
 	c.fillText(name + ' is the winner!!!', canvas.width/2, canvas.height/2);
 }
 
-function createDeck(available_cards) {
+//Create a deck of cards based on what is sent to the player from the server.
+function create_deck(available_cards) {
 	for (let i = 0; i < available_cards.length; i++) {
 		my_cards[i] = available_cards[i];
 		document.querySelector('#c'+(i+1)).textContent = my_cards[i].response;
@@ -101,11 +132,12 @@ function createDeck(available_cards) {
 	}
 }
 
-//When receiving a message from the server, do writeChat function.
+//When receiving a message from the server, do write_chat function.
 const socket = io.connect();
 
+//Add chat message to chat history.
 socket.on('message', (text) => {
-	writeChat(text);
+	write_chat(text);
 });
 
 //Set the player's name locally if it is allowed by the server.
@@ -113,6 +145,7 @@ socket.on('name_set', (name) => {
 	socket.name = name;
 });
 
+//Set the player's room, and label the top of the leaderboard appropriately.
 socket.on('room_set', (room) => {
 	socket.room = room;
 	const title = document.querySelector('#leaderboard-title');
@@ -121,7 +154,7 @@ socket.on('room_set', (room) => {
 
 //Set the player's deck when they first join.
 socket.on('create_deck', (available_cards) => {
-	createDeck(available_cards);
+	create_deck(available_cards);
 });
 
 //Remove card from player's deck after they play it, and remove options from the judge after they pick their favorite.
@@ -132,29 +165,29 @@ socket.on('clear_deck', (cards) => {
 	document.querySelector('#c4').style.visibility = 'hidden';
 	document.querySelector('#c5').style.visibility = 'hidden';
 	for (let i = 0; i < cards.length; i++) {
-		console.log(cards[i]);
 		var pos = my_cards.findIndex(x => x.response === cards[i].response);
-		console.log(pos);
 		my_cards.splice(pos,1);
 	}
-	createDeck(my_cards);
+	create_deck(my_cards);
 })
 
-socket.on('create_blackcard', (current_prompt) => {
+//Clear the canvas and redraw it whenever the canvas needs to be updated.
+socket.on('create_gameview', (current_prompt, player_status) => {
 	c.clearRect(0, 0, canvas.width, canvas.height);
 	canvas.width = canvas.parentNode.clientWidth;
 	canvas.height = canvas.parentNode.clientHeight;
-	createBlackCard(current_prompt.cue, current_prompt.judge);
-	blackcard_txt = current_prompt.cue;
-	judge_name = current_prompt.judge;
+	create_game_view(current_prompt, player_status);
+	round_prompt = current_prompt;
+	players = player_status;
 });
 
+//Clear the canvas and display the winner message.
 socket.on('display_winner', (name) => {
 	game_over = true;
 	c.clearRect(0, 0, canvas.width, canvas.height);
 	canvas.width = canvas.parentNode.clientWidth;
 	canvas.height = canvas.parentNode.clientHeight;
-	displayWinner(name);
+	display_winner(name);
 	winner_name = name;
 });
 
@@ -172,33 +205,33 @@ socket.on('player_update', (clients) => {
 });
 
 //Default message upon first joining.
-writeChat('SYSTEM: Hello, welcome to Cards Against the Internet!');
-writeChat('SYSTEM: Please enter a 4-character room code. You may join an existing room or create your own.')
+write_chat('SYSTEM: Hello, welcome to Cards Against the Internet!');
+write_chat('SYSTEM: Please enter a 4-character room code. You may join an existing room or create your own.')
 
 //Event Listeners.
-document.querySelector('#chat-form').addEventListener('submit', onChatSubmitted);
+document.querySelector('#chat-form').addEventListener('submit', on_chat_submitted);
 
-document.querySelector('#c1').addEventListener('click', onCardSubmitted);
-document.querySelector('#c2').addEventListener('click', onCardSubmitted);
-document.querySelector('#c3').addEventListener('click', onCardSubmitted);
-document.querySelector('#c4').addEventListener('click', onCardSubmitted);
-document.querySelector('#c5').addEventListener('click', onCardSubmitted);
+document.querySelector('#c1').addEventListener('click', on_card_submitted);
+document.querySelector('#c2').addEventListener('click', on_card_submitted);
+document.querySelector('#c3').addEventListener('click', on_card_submitted);
+document.querySelector('#c4').addEventListener('click', on_card_submitted);
+document.querySelector('#c5').addEventListener('click', on_card_submitted);
 
-//Resive Canvas when window changes size
+//Resive Canvas when window changes size.
 window.addEventListener("resize", resizeCanvas, false);
 function resizeCanvas(e) {
 	if (!game_over) {
 		canvas.width = canvas.parentNode.clientWidth;
 		canvas.height = canvas.parentNode.clientHeight;
-		if (socket.name != null && blackcard_txt != '') {
-			createBlackCard(blackcard_txt, judge_name);
+		if (round_prompt.judge != null && round_prompt.cue != '') {
+			create_game_view(round_prompt, players);
 		}
 	}
 	else {
 		canvas.width = canvas.parentNode.clientWidth;
 		canvas.height = canvas.parentNode.clientHeight;
-		if (winner_name != null) {
-			displayWinner(winner_name);
+		if (winner_name != '') {
+			display_winner(winner_name);
 		}
 	}
 }

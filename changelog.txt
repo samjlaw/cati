@@ -168,3 +168,21 @@ The host can no longer start a game with less than 3 players. If players leave m
 Fixed an issue that caused a server crash when a room would become empty after two or more players leave simultaneously. 
 
 Fixed an issue that caused a server crash when the game attempted to pick a player that previously left the room as the next judge.
+
+------------------------------------------------------------------
+Apr 26, 2020:
+
+Added more canvas graphics.
+	All non-judge players now show up on canvas during the round.
+	Underneath all players is a green or red circle that denotes if they have submitted their card yet.
+	
+Improved functionality for continuing games after people leave the room.
+	Fixed a softlock that occurred if the number of responses exceeded the number of current players.
+	Fixed a softlock that occurred if a player left before submitting while being the only one left that needed to submit.
+	The game now immediately ends if there is only one player on the server after the game started.
+	
+Fixed an issue where a game would have no winner if nobody won any points.
+
+Minor code consistency cleanup.
+
+------------------------------------------------------------------

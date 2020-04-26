@@ -11,7 +11,7 @@ app.use(express.static(client_dir));
 const server = http.createServer(app);
 const io = socketio.listen(server);
 
-//Master list of cards. There should be 160 white cards.
+//Master list of all white cards. There should be 160 white cards.
 var all_white_cards = [];
 all_white_cards[0] = 'Cards Against Humanity';
 all_white_cards[1] = 'Apples to Apples';
@@ -29,6 +29,24 @@ all_white_cards[12] = 'Hello World!';
 all_white_cards[13] = 'white_cards[13]';
 all_white_cards[14] = 'Don\'t Click This';
 all_white_cards[15] = 'Beep Beep Boop';
+all_white_cards[16] = 'MICS';
+all_white_cards[17] = 'CATI';
+all_white_cards[18] = 'Hello World!';
+all_white_cards[19] = 'white_cards[13]';
+all_white_cards[20] = 'Don\'t Click This';
+all_white_cards[21] = 'Beep Beep Boop';
+all_white_cards[22] = 'MICS';
+all_white_cards[23] = 'CATI';
+all_white_cards[24] = 'Hello World!';
+all_white_cards[25] = 'white_cards[13]';
+all_white_cards[26] = 'Don\'t Click This';
+all_white_cards[27] = 'Beep Beep Boop';
+all_white_cards[28] = 'MICS';
+all_white_cards[29] = 'CATI';
+all_white_cards[30] = 'Hello World!';
+all_white_cards[31] = 'white_cards[13]';
+all_white_cards[32] = 'Don\'t Click This';
+all_white_cards[33] = 'Beep Beep Boop';
 
 //Maser list of all black cards. There should be 20 black cards.
 var all_black_cards = [];
@@ -50,11 +68,13 @@ function player_update(room) {
 	}
 }
 
-//Set the current room's response numbers to zero, clear the judge's cards, and send a black card with a new prompt.
+//Set the current room's response numbers to zero, clear the judge's cards and player responses from previous round, and send a black card with a new prompt.
 function start_round(room) {
 	var current_room = io.sockets.adapter.rooms[room];
 	current_room.responses = 0;
 	current_room.judge_options = [];
+	current_room.player_status = [];
+	current_room.all_submitted = false;
 	
 	for (var clientID in current_room.sockets) {
 		var clientSocket = io.sockets.connected[clientID];
@@ -62,17 +82,21 @@ function start_round(room) {
 		if (clientSocket.id == current_room.judge[0]) {
 			io.to(clientSocket.id).emit('clear_deck', clientSocket.deck);
 		}
+		else {
+			current_room.player_status.push({name:clientSocket.name, played:clientSocket.played});
+		}
 	}
+	
 	var current_cue = Math.floor(Math.random() * current_room.black_cards.length);
-	var round_info = {judge:io.sockets.connected[current_room.judge[0]].name, cue:current_room.black_cards[current_cue]};
+	current_room.round_info = {judge:io.sockets.connected[current_room.judge[0]].name, cue:current_room.black_cards[current_cue]};
 	current_room.black_cards.splice(current_cue,1);
-	io.sockets.in(room).emit('create_blackcard', round_info);
+	io.sockets.in(room).emit('create_gameview', current_room.round_info, current_room.player_status);
 }
 
 //Once all black cards have been played, or some other circumstance causes the game to end, declare the winner.
 function declare_winner(room) {
 	var current_room = io.sockets.adapter.rooms[room];
-	var max_score = {name:'', score:0};
+	var max_score = {name:'', score:-1};
 	for (var clientID in current_room.sockets) {
 		var clientSocket = io.sockets.connected[clientID];
 		io.to(clientSocket.id).emit('clear_deck', clientSocket.deck);
@@ -121,6 +145,9 @@ io.sockets.on('connection', (socket) => {
 					current_room.black_cards = all_black_cards.slice();
 					current_room.responses = [];
 					current_room.judge = [];
+					current_room.player_status = [];
+					current_room.round_info = [];
+					current_room.all_submitted = false;
 					current_room.judge.push(socket.id);
 					current_room.playing = false;
 				}
@@ -243,6 +270,10 @@ io.sockets.on('connection', (socket) => {
 			socket.response = content;
 			current_room.responses += 1;
 			
+			var played_pos = current_room.player_status.findIndex(x => x.name == socket.name);
+			current_room.player_status[played_pos].played = true;
+			io.sockets.in(socket.room).emit('create_gameview', current_room.round_info, current_room.player_status);
+			
 			//Remove the played card from the player's deck and give them a new one.
 			socket.emit('clear_deck', [socket.response]);
 			var pos = socket.deck.findIndex(x => x.response === content.response);
@@ -254,7 +285,8 @@ io.sockets.on('connection', (socket) => {
 				socket.emit('create_deck', socket.deck);
 			}
 			
-			if (current_room.responses == current_room.length-1) {
+			if (current_room.responses >= current_room.length-1 && !current_room.all_submitted) {
+				current_room.all_submitted = true;
 				io.sockets.in(socket.room).emit('message', 'SYSTEM: All responses received! ' + io.sockets.connected[current_room.judge[0]].name + ' is now selecting their favorite response.');
 				for (var clientID in current_room.sockets) {
 					var clientSocket = io.sockets.connected[clientID];
@@ -276,9 +308,35 @@ io.sockets.on('connection', (socket) => {
 				returned_cards.push(socket.deck[i].response);
 			}
 			current_room.white_cards = io.sockets.adapter.rooms[socket.room].white_cards.concat(returned_cards);
-			console.log(current_room.judge);
 			current_room.judge.splice(current_room.judge.indexOf(socket.id),1);
-			console.log(current_room.judge);
+			
+			var pos = current_room.player_status.findIndex(x => x.name == socket.name);
+			current_room.player_status.splice(pos,1);
+			io.sockets.in(socket.room).emit('create_gameview', current_room.round_info, current_room.player_status);
+			
+			if (current_room.responses >= current_room.length-1) {
+				if (!current_room.all_submitted) {
+					current_room.all_submitted = true;
+					io.sockets.in(socket.room).emit('message', 'SYSTEM: All responses received! ' + io.sockets.connected[current_room.judge[0]].name + ' is now selecting their favorite response.');
+					for (var clientID in current_room.sockets) {
+						var clientSocket = io.sockets.connected[clientID];
+						if (clientSocket.id != current_room.judge[0]) current_room.judge_options.push(clientSocket.response);
+					}
+					io.to(current_room.judge[0]).emit('create_deck', current_room.judge_options);
+				}
+				else {
+					io.to(current_room.judge[0]).emit('clear_deck', current_room.judge_options);
+					pos = current_room.judge_options.findIndex(x => x.name == socket.name);
+					current_room.judge_options.splice(pos,1);
+					io.to(current_room.judge[0]).emit('create_deck', current_room.judge_options);					
+				}
+			}
+			
+			if (current_room.length == 1) {
+				io.sockets.in(socket.room).emit('message', 'SYSTEM: All other players have left the room. The game is now ending.');
+				declare_winner(socket.room);
+			}
+			
 			player_update(socket.room);
 		}
 	});
