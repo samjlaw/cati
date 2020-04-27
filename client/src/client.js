@@ -7,7 +7,9 @@ var available_cards = [];
 //Blackcard cue and player names stored locally for resizing purposes.
 var players = [];
 var round_prompt = [];
+var best_response = [];
 var winner_name = '';
+var round_over = false;
 var game_over = false;
 var view_title = true;
 
@@ -23,6 +25,9 @@ const write_chat = (text) => {
 	const new_li = document.createElement('li');
 	new_li.textContent = text;
 	parent.appendChild(new_li);
+	//Make scroll bar stick to bottom when new messages come in.
+	var div = document.querySelector('#chat-history');
+	div.scrollTop = div.scrollHeight - div.clientHeight;
 };
 
 //Take text from #chat and submit it to server to send to everyone.
@@ -73,6 +78,7 @@ const start_game = (event) => {
 	socket.emit('start_game');
 };
 
+//Leave current room and hide start and leave buttons.
 const leave_game = (event) => {
 	event.preventDefault();
 	socket.emit('leave_room');
@@ -162,9 +168,41 @@ function create_game_view(current_prompt, player_status) {
 	}
 }
 
+//Display the winner of the current round and their response fitted into the prompt.
+function display_round_winner(current_prompt, player_response) {
+	//Card
+	c.fillStyle = 'black';
+	c.fillRect(canvas.width/2-canvas.width/10, canvas.height/2-canvas.height*.4, canvas.width/5, canvas.height/2);
+	//Cue
+	c.font = (canvas.width*1.5/100) + 'px Arial';
+	c.fillStyle = 'white';
+	wrap_text(current_prompt.cue, canvas.width/2-canvas.width/10+canvas.width/200, canvas.height/2-canvas.height*.35, canvas.width/5, canvas.width*1.5/80);
+	//Logo
+	c.font = (canvas.width/100) + 'px Arial';
+	c.fillText('Cards Against the Internet', canvas.width/2-canvas.width/10+canvas.width/200, canvas.height/2+canvas.height/12);
+	//Judge Name
+	c.font = (canvas.width/100 * 2) + 'px Arial';
+	c.fillStyle = 'black';
+	var judge_txt = 'Judge - ' + current_prompt.judge;
+	c.fillText(judge_txt, canvas.width/2 - c.measureText(judge_txt).width/2, canvas.height/15);
+	
+	//Winner's Name
+	c.font = (canvas.width*1.75/100) + 'px Arial';
+	c.fillStyle = 'black';
+	var winner_txt = 'Winner: ' + player_response.name;
+	c.fillText(winner_txt, canvas.width/2 - c.measureText(winner_txt).width/2, canvas.height/15*12);
+	
+	//Winner's Prompt
+	c.font = (canvas.width*1.75/100) + 'px Arial';
+	c.fillStyle = 'black';
+	var cue = current_prompt.cue.split('_____');
+	var winning_prompt = cue[0] + player_response.response + cue[1];
+	c.fillText(winning_prompt, canvas.width/2 - c.measureText(winning_prompt).width/2, canvas.height/15*13);
+}
+
 //Display a message once the game has ended and the winner is decided.
-function display_winner(name) {
-	c.font = (canvas.width/100 * 5) + 'px Arial';
+function display_game_winner(name) {
+	c.font = (canvas.width*5/100) + 'px Arial';
 	c.fillStyle = 'black';
 	var winner_txt = name + ' is the winner!!!';
 	c.fillText(winner_txt, canvas.width/2 - c.measureText(winner_txt).width/2, canvas.height/2);
@@ -230,6 +268,7 @@ socket.on('title_screen', () => {
 //Clear the canvas and redraw it whenever the canvas needs to be updated.
 socket.on('create_gameview', (current_prompt, player_status) => {
 	view_title = false;
+	round_over = false;
 	c.clearRect(0, 0, canvas.width, canvas.height);
 	canvas.width = canvas.parentNode.clientWidth;
 	canvas.height = canvas.parentNode.clientHeight;
@@ -238,13 +277,24 @@ socket.on('create_gameview', (current_prompt, player_status) => {
 	players = player_status;
 });
 
+//Clear the canvas and display the winning prompt of the current round.
+socket.on('display_round_winner', (current_prompt, player_response) => {
+	round_over = true;
+	c.clearRect(0, 0, canvas.width, canvas.height);
+	canvas.width = canvas.parentNode.clientWidth;
+	canvas.height = canvas.parentNode.clientHeight;
+	display_round_winner(current_prompt, player_response);
+	round_prompt = current_prompt;
+	best_response = player_response;
+});
+
 //Clear the canvas and display the winner message.
-socket.on('display_winner', (name) => {
+socket.on('display_game_winner', (name) => {
 	game_over = true;
 	c.clearRect(0, 0, canvas.width, canvas.height);
 	canvas.width = canvas.parentNode.clientWidth;
 	canvas.height = canvas.parentNode.clientHeight;
-	display_winner(name);
+	display_game_winner(name);
 	winner_name = name;
 });
 
@@ -304,11 +354,16 @@ function resizeCanvas(e) {
 			create_game_view(round_prompt, players);
 		}
 	}
+	else if (round_over) {
+		canvas.width = canvas.parentNode.clientWidth;
+		canvas.height = canvas.parentNode.clientHeight;
+		display_round_winner(current_prompt, player_response);
+	}
 	else {
 		canvas.width = canvas.parentNode.clientWidth;
 		canvas.height = canvas.parentNode.clientHeight;
 		if (winner_name != '') {
-			display_winner(winner_name);
+			display_game_winner(winner_name);
 		}
 	}
 }

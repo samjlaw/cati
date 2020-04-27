@@ -186,8 +186,8 @@ function declare_winner(room) {
 	}
 	setTimeout(function() {
 		io.sockets.in(room).emit('message', 'SYSTEM: ' + max_score.name + ' is the winner of the game with ' + max_score.score + ' points!');
-		io.sockets.in(room).emit('display_winner', max_score.name);
-	}, 1000);
+		io.sockets.in(room).emit('display_game_winner', max_score.name);
+	}, 3000);
 	
 	//Reset cards and allow host to start a new game.
 	current_room.white_cards = all_white_cards.slice();
@@ -376,13 +376,7 @@ io.sockets.on('connection', (socket) => {
 	//When client sends a message to the server, send the text to all clients.
 	socket.on('message', (text) => {
 		var current_room = io.sockets.adapter.rooms[socket.room];
-		io.sockets.in(socket.room).emit('message', socket.name + ': ' + text);
-		//debug
-		if (text == '!refresh') current_room.white_cards = all_white_cards.slice();
-		if (text == '!giveScore') {
-			socket.score += 1;
-			player_update(socket.room);
-		}
+		if (text != '') io.sockets.in(socket.room).emit('message', socket.name + ': ' + text);
 	});
 	
 	//Start the game if the host requests to start. If another player tries to start, don't do anything.
@@ -410,15 +404,20 @@ io.sockets.on('connection', (socket) => {
 			current_room.judge.push(socket.id);
 			if (current_room.length < 3) {
 				io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + content.name + ' won the round! Since there are currently fewer than 3 players, the game must now end.');
+				io.sockets.in(socket.room).emit('display_round_winner', current_room.round_info, content);
 				declare_winner(socket.room);
 			}
 			else if (current_room.black_cards.length == 0) {
 				io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + content.name + ' won the round! All Black Cards have been played, and the game is now ending.');
+				io.sockets.in(socket.room).emit('display_round_winner', current_room.round_info, content);
 				declare_winner(socket.room);
 			}
 			else {
 				io.sockets.in(socket.room).emit('message', 'SYSTEM: ' + content.name + ' won the round! ' + io.sockets.connected[current_room.judge[0]].name + ' is the next judge.');
-				start_round(socket.room, false);
+				io.sockets.in(socket.room).emit('display_round_winner', current_room.round_info, content);
+				setTimeout(function() {
+					start_round(socket.room, false);
+				}, 3000);
 			}
 		}
 		//When a player submits their response, add it to the list of responses for the judge. When all responses are collected, send them to the judge.

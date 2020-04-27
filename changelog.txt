@@ -222,3 +222,13 @@ Added more white cards and black cards.
 Fixed an issue where restarting the game would not visibly change the leaderboard until after the first round of the next game.
 
 ------------------------------------------------------------------
+Apr 27, 2020: (Release Candidate 1)
+
+The canvas shortly displays the winner of each round shortly before starting the next round.
+	Underneath the winner's name is also the current prompt, with the winner's response filled into the blank.
+
+The scroll bar for chat now sticks to the bottom when new messages come in.
+
+Players can no longer send empty text as a chat.
+
+------------------------------------------------------------------
