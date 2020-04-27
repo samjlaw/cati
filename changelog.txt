@@ -236,6 +236,6 @@ Removed debugging commands.
 ------------------------------------------------------------------
 Apr 27, 2020 Update 2: (Release Candidate 2)
 
-Preparing app deployment for Heroku.
+Major project restructuring to prepare for app deployment on Heroku.
 
 ------------------------------------------------------------------

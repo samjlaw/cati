@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Cards Against the Internet</title>
+		<link rel="stylesheet" href="main.css">
+	</head>
+	<body>
+	
+		<div class="game-screen">
+			<div class="player-wrapper">
+				<li id="leaderboard-title"></li>
+				<div id="players">
+					<ul id="leaderboard"></ul>
+				</div>
+			</div>
+		
+			<div class="visual-wrapper">
+				<canvas id="card-screen" width="100%" height="auto"></canvas>
+			</div>
+	
+			<div class="social-wrapper">
+				<ul id="chat-history"></ul>
+				<div class="chat-wrapper">
+					<form id="chat-form">
+						<input id="chat" title="Chat with other players!" autocomplete="off"/>
+						<button id="send">Send</button>
+					</form>
+				</div>
+			</div>
+			
+			<div class="card-input">
+				<form id="card-form">
+					<button id="c1">Card 1</button>
+					<button id="c2">Card 2</button>
+					<button id="c3">Card 3</button>
+					<button id="c4">Card 4</button>
+					<button id="c5">Card 5</button>
+				</form>
+			</div>
+			
+			<div class="start-leave-game">
+				<form id="status-form">
+					<button id="start">Start Game</button>
+					<button id="leave">Leave Game</button>
+				</form>
+			</div>
+		</div>
+		
+		<script src="/socket.io/socket.io.js"></script>
+		<script type="module" src="src/client.js"></script>
+	</body>
+</html>
