@@ -86,13 +86,13 @@ const leave_game = (event) => {
 
 //Wrap text so the black cards can have multiple lines.
 function wrap_text(txt, x, y, max_width, line_height) {
-    var words = txt.split(' ');
-    var line = '';
+	var words = txt.split(' ');
+	var line = '';
 	
-    for(var i = 0; i < words.length; i++) {
+	for(var i = 0; i < words.length; i++) {
 		var new_line = line + words[i] + ' ';
-        var line_width = c.measureText(new_line).width;
-        if (line_width > max_width && i > 0) {
+		var line_width = c.measureText(new_line).width;
+		if (line_width > max_width && i > 0) {
 			c.fillText(line, x, y);
 			line = words[i] + ' ';
 			y += line_height;

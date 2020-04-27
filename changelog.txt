@@ -215,3 +215,10 @@ Fixed an issue where the game would declare a winner twice if all but one person
 Fixed an issue that caused a server crash when the host started a game without setting their name first.
 
 ------------------------------------------------------------------
+Apr 26, 2020 Update 3:
+
+Added more white cards and black cards.
+
+Fixed an issue where restarting the game would not visibly change the leaderboard until after the first round of the next game.
+
+------------------------------------------------------------------

@@ -11,47 +11,85 @@ app.use(express.static(client_dir));
 const server = http.createServer(app);
 const io = socketio.listen(server);
 
-//Master list of all white cards. There should be 160 white cards.
+//Master list of all white cards.
 var all_white_cards = [];
-all_white_cards[0] = 'Cards Against Humanity';
-all_white_cards[1] = 'Apples to Apples';
-all_white_cards[2] = 'Computer Science';
-all_white_cards[3] = 'Cold winter weather in Iowa';
-all_white_cards[4] = 'Socket.IO';
-all_white_cards[5] = 'Discord';
-all_white_cards[6] = 'Capstone';
-all_white_cards[7] = 'Simpson College';
-all_white_cards[8] = 'Carver Science Lab';
-all_white_cards[9] = 'Pfeiffer';
-all_white_cards[10] = 'MICS';
-all_white_cards[11] = 'CATI';
-all_white_cards[12] = 'Hello World!';
-all_white_cards[13] = 'white_cards[13]';
-all_white_cards[14] = 'Don\'t Click This';
-all_white_cards[15] = 'Beep Beep Boop';
-all_white_cards[16] = '16';
-all_white_cards[17] = '17';
-all_white_cards[18] = '18';
-all_white_cards[19] = '19';
-all_white_cards[20] = '20';
-all_white_cards[21] = '21';
-all_white_cards[22] = '22';
-all_white_cards[23] = '23';
-all_white_cards[24] = '24';
-all_white_cards[25] = '25';
-all_white_cards[26] = '26';
-all_white_cards[27] = '27';
-all_white_cards[28] = '28';
-all_white_cards[29] = '29';
-all_white_cards[30] = '30';
-all_white_cards[31] = '31';
-all_white_cards[32] = '32';
-all_white_cards[33] = '33';
+all_white_cards[0] = 'Cards Against Humanity'; all_white_cards[1] = 'Apples to Apples'; all_white_cards[2] = 'Computer Science';
+all_white_cards[3] = 'Pac-Man'; all_white_cards[4] = 'Tonight\'s Big Loser'; all_white_cards[5] = 'Discord';
+all_white_cards[6] = 'Indianola'; all_white_cards[7] = 'Simpson College'; all_white_cards[8] = 'Carver Science Lab';
+all_white_cards[9] = 'Pfeiffer'; all_white_cards[10] = 'MICS'; all_white_cards[11] = 'Pickle Rick';
+all_white_cards[12] = 'Hello World!'; all_white_cards[13] = 'Big Juicy Sandwich'; all_white_cards[14] = 'Don\'t Click This';
+all_white_cards[15] = 'A Robot That Goes "Beep Beep Boop"'; all_white_cards[16] = 'Five Dollar Footlong'; all_white_cards[17] = 'Skype';
+all_white_cards[18] = 'Obama'; all_white_cards[19] = 'Bigfoot'; all_white_cards[20] = 'Minecraft Diamonds';
+all_white_cards[21] = 'Tom Hanks'; all_white_cards[22] = 'Animal Crossing New Horizons'; all_white_cards[23] = 'Surprised Pikachu';
+all_white_cards[24] = 'A Misspelled Tattoo'; all_white_cards[25] = 'My Spleen'; all_white_cards[26] = 'Virtual Reality';
+all_white_cards[27] = 'Mountain Dew Baja Blast'; all_white_cards[28] = 'Peanuts'; all_white_cards[29] = 'The Des Moines Register';
+all_white_cards[30] = 'Boss Baby'; all_white_cards[31] = 'The Public Pool'; all_white_cards[32] = 'Sonic the Hedgehog';
+all_white_cards[33] = 'Our Brave Troops'; all_white_cards[34] = 'Twitter'; all_white_cards[35] = 'Diet Coke';
+all_white_cards[36] = 'A Baby Labradoodle'; all_white_cards[37] = 'This Game'; all_white_cards[38] = 'Ace of Clubs';
+all_white_cards[39] = 'Victory Royale'; all_white_cards[40] = 'Super Mario Bros. 2'; all_white_cards[41] = 'A Red Flannel Shirt';
+all_white_cards[42] = 'Legos'; all_white_cards[43] = 'Waffles'; all_white_cards[44] = 'Underwear';
+all_white_cards[45] = 'Teeth'; all_white_cards[46] = 'Avocado Toast'; all_white_cards[47] = 'Olive Garden';
+all_white_cards[48] = 'Battery Acid'; all_white_cards[49] = 'Pizza Pie'; all_white_cards[50] = 'Grunkle Stan';
+all_white_cards[51] = 'Spongebob Squarepants'; all_white_cards[52] = 'La Croix Seltzer'; all_white_cards[53] = 'Fareway';
+all_white_cards[54] = 'Garlic Bread'; all_white_cards[55] = 'Deadpool'; all_white_cards[56] = 'Expired Milk';
+all_white_cards[57] = 'Samsung'; all_white_cards[58] = 'Twitch.tv'; all_white_cards[59] = 'La Casa';
+all_white_cards[60] = 'A Great Big Top Hat'; all_white_cards[61] = 'The 8th President of the United States, Martin van Buren'; all_white_cards[62] = 'Rats';
+all_white_cards[63] = 'Charizard'; all_white_cards[64] = 'Donald Duck'; all_white_cards[65] = 'Chris Pratt';
+all_white_cards[66] = 'Japan'; all_white_cards[67] = 'George Washington'; all_white_cards[68] = 'Radioactive Laser Beams';
+all_white_cards[69] = 'The Godfather'; all_white_cards[70] = 'Star Wars'; all_white_cards[71] = 'Anchovies';
+all_white_cards[72] = 'Pineapple on Pizza'; all_white_cards[73] = 'Hank Hill'; all_white_cards[74] = 'A Generic White Card';
+all_white_cards[75] = 'The Best Answer'; all_white_cards[76] = 'Artificial Intelligence'; all_white_cards[77] = 'Spiders';
+all_white_cards[78] = 'The Czech Republic'; all_white_cards[79] = 'Humanity'; all_white_cards[80] = 'Soulja Boy';
+all_white_cards[81] = 'The YMCA'; all_white_cards[82] = 'Dunn Library'; all_white_cards[83] = 'Go-Karting';
+all_white_cards[84] = 'Swearing'; all_white_cards[85] = 'The Last Day of Class'; all_white_cards[86] = 'Zombies';
+all_white_cards[87] = 'Giant Monster Trucks'; all_white_cards[88] = 'Penguins'; all_white_cards[89] = 'Preschool';
+all_white_cards[90] = 'Mad Cow Disease'; all_white_cards[91] = 'Peter Griffin'; all_white_cards[92] = 'Batman';
+all_white_cards[93] = 'Australia'; all_white_cards[94] = 'An R.C. Helicopter'; all_white_cards[95] = 'Goodwill';
+all_white_cards[96] = 'Chapstick'; all_white_cards[97] = 'Apple'; all_white_cards[98] = 'John Wick';
+all_white_cards[99] = 'A TV Remove With Too Many Buttons'; all_white_cards[100] = 'George Lopez'; all_white_cards[101] = 'Karate';
+all_white_cards[102] = 'Robert Downey Jr.'; all_white_cards[103] = 'The Way It Be Sometimes'; all_white_cards[104] = 'Professional Gamers';
+all_white_cards[105] = 'My Grandma'; all_white_cards[106] = 'Luigi'; all_white_cards[107] = 'Instagram';
+all_white_cards[108] = 'Goldfish Crackers'; all_white_cards[109] = 'A Kiss On The Cheek'; all_white_cards[110] = 'A Hamburger';
+all_white_cards[111] = 'The Wii'; all_white_cards[112] = 'My 5th Grade Yearbook'; all_white_cards[113] = 'High Heels';
+all_white_cards[114] = 'Saran Wrap'; all_white_cards[115] = 'A Dirty Gas Station'; all_white_cards[116] = 'Facebook';
+all_white_cards[117] = 'Smith Chapel'; all_white_cards[118] = 'Spiderman'; all_white_cards[119] = 'Balloons';
+all_white_cards[120] = 'Dance Dance Revolution'; all_white_cards[121] = 'Thomas Edison'; all_white_cards[122] = 'The Joker';
+all_white_cards[123] = 'Mark Zuckerberg'; all_white_cards[124] = 'John Goodman'; all_white_cards[125] = 'Nicolas Cage';
+all_white_cards[126] = 'Deviled Eggs'; all_white_cards[127] = 'The Circus'; all_white_cards[128] = 'Iowa';
+all_white_cards[129] = 'Richard Nixon'; all_white_cards[130] = 'Squidward Tentacles'; all_white_cards[131] = 'The Meaning of Life';
+all_white_cards[132] = 'Forgetting To Save A File'; all_white_cards[133] = 'Bill Clinton'; all_white_cards[134] = 'Gummy Bears';
+all_white_cards[135] = 'Something Inappropriate'; all_white_cards[136] = 'Red Light Green Light'; all_white_cards[137] = 'Pancakes';
+all_white_cards[138] = 'Homer Simpson'; all_white_cards[139] = 'Kent Campus Center'; all_white_cards[140] = 'Roblox';
+all_white_cards[141] = 'HTML'; all_white_cards[142] = 'Bill Gates'; all_white_cards[143] = 'Pinball';
+all_white_cards[144] = 'The Moon'; all_white_cards[145] = 'The Stock Market'; all_white_cards[146] = 'Rocky Road Ice Cream';
+all_white_cards[147] = 'Antarctica'; all_white_cards[148] = 'Dish Soap'; all_white_cards[149] = 'Graphic T-Shirts';
+all_white_cards[150] = 'Marco Polo'; all_white_cards[151] = 'Bowling'; all_white_cards[152] = 'The Yankee With No Brim';
+all_white_cards[153] = 'Michael with a B'; all_white_cards[154] = 'Pool Noodles'; all_white_cards[155] = 'An Army of Squirrels';
+all_white_cards[156] = 'A Good Work Ethic'; all_white_cards[157] = 'Fist Bumping'; all_white_cards[158] = 'A Belly Flop Off The High Dive';
+all_white_cards[159] = 'A Glass Of Water With Ice'; 
 
-//Maser list of all black cards. There should be 20 black cards.
+//Maser list of all black cards.
 var all_black_cards = [];
-all_black_cards[0] = 'I go to _____ class.';
-all_black_cards[1] = 'I don\'t go to _____ class.';
+all_black_cards[0] = 'I go to class to learn about _____.';
+all_black_cards[1] = 'One day, _____ will take over the world.';
+all_black_cards[2] = 'Have I told you about my new _____?';
+all_black_cards[3] = 'New business idea: Amazon, but for _____.';
+all_black_cards[4] = 'What\'s that smell? It\'s _____.';
+all_black_cards[5] = '_____: The Musical!';
+all_black_cards[6] = 'You brought _____ into a movie theater? What were you thinking?';
+all_black_cards[7] = 'I am fluent in 37 languages, including the language of _____.';
+all_black_cards[8] = '_____, I never leave the house without it!';
+all_black_cards[9] = 'According to NASA, the Earth is on a collision course with _____.';
+all_black_cards[10] = 'The new Star Wars movie was great until they brought in _____.';
+all_black_cards[11] = 'Ryan Reynolds was actually _____ all along.';
+all_black_cards[12] = 'I can\'t take it anymore. I love _____. There, I said it, and I\'m tired of pretending that I don\'t.';
+all_black_cards[13] = 'Girls Locker Room: Ugh she has the same shirt as me... Boys Locker Room: _____.';
+all_black_cards[14] = '_____ is mightier than the sword.';
+all_black_cards[15] = 'As a kid, I was afraid of _____ under my bed.';
+all_black_cards[16] = 'Studies have shown that administering _____ daily can increase one\'s lifespan.';
+all_black_cards[17] = 'Are you kidding me? I climbed Mount Everest and all I got was _____.';
+all_black_cards[18] = 'You know what they say: An apple a day keeps _____ away.';
+all_black_cards[19] = 'Yeah, I\'m in a fraternity: Lambda Alpha _____.';
 
 //Update the leaderboard of players when a player leaves, or when someone's score changes.
 function player_update(room) {
@@ -94,6 +132,7 @@ function start_game(room, name, id, host) {
 				}
 				if (clientSocket.id != current_room.judge[0]) io.to(clientSocket.id).emit('create_deck', clientSocket.deck);
 			}
+			player_update(room);
 		}
 		else io.to(id).emit('message', 'SYSTEM: Sorry, you need at least 3 players to start a game.');
 	}
