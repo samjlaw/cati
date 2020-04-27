@@ -16,7 +16,7 @@ all_white_cards[0] = 'Cards Against Humanity'; all_white_cards[1] = 'Apples to A
 all_white_cards[3] = 'Pac-Man'; all_white_cards[4] = 'Tonight\'s Big Loser'; all_white_cards[5] = 'Discord';
 all_white_cards[6] = 'Indianola'; all_white_cards[7] = 'Simpson College'; all_white_cards[8] = 'Carver Science Lab';
 all_white_cards[9] = 'Pfeiffer'; all_white_cards[10] = 'MICS'; all_white_cards[11] = 'Pickle Rick';
-all_white_cards[12] = 'Hello World!'; all_white_cards[13] = 'Big Juicy Sandwich'; all_white_cards[14] = 'Don\'t Click This';
+all_white_cards[12] = 'Hello World!'; all_white_cards[13] = 'Big Juicy Sandwich'; all_white_cards[14] = 'Nothing';
 all_white_cards[15] = 'A Robot That Goes "Beep Beep Boop"'; all_white_cards[16] = 'Five Dollar Footlong'; all_white_cards[17] = 'Skype';
 all_white_cards[18] = 'Obama'; all_white_cards[19] = 'Bigfoot'; all_white_cards[20] = 'Minecraft Diamonds';
 all_white_cards[21] = 'Tom Hanks'; all_white_cards[22] = 'Animal Crossing New Horizons'; all_white_cards[23] = 'Surprised Pikachu';
@@ -45,7 +45,7 @@ all_white_cards[87] = 'Giant Monster Trucks'; all_white_cards[88] = 'Penguins'; 
 all_white_cards[90] = 'Mad Cow Disease'; all_white_cards[91] = 'Peter Griffin'; all_white_cards[92] = 'Batman';
 all_white_cards[93] = 'Australia'; all_white_cards[94] = 'An R.C. Helicopter'; all_white_cards[95] = 'Goodwill';
 all_white_cards[96] = 'Chapstick'; all_white_cards[97] = 'Apple'; all_white_cards[98] = 'John Wick';
-all_white_cards[99] = 'A TV Remove With Too Many Buttons'; all_white_cards[100] = 'George Lopez'; all_white_cards[101] = 'Karate';
+all_white_cards[99] = 'A TV Remote With Too Many Buttons'; all_white_cards[100] = 'George Lopez'; all_white_cards[101] = 'Karate';
 all_white_cards[102] = 'Robert Downey Jr.'; all_white_cards[103] = 'The Way It Be Sometimes'; all_white_cards[104] = 'Professional Gamers';
 all_white_cards[105] = 'My Grandma'; all_white_cards[106] = 'Luigi'; all_white_cards[107] = 'Instagram';
 all_white_cards[108] = 'Goldfish Crackers'; all_white_cards[109] = 'A Kiss On The Cheek'; all_white_cards[110] = 'A Hamburger';
@@ -375,7 +375,8 @@ io.sockets.on('connection', (socket) => {
 	//When client sends a message to the server, send the text to all clients.
 	socket.on('message', (text) => {
 		var current_room = io.sockets.adapter.rooms[socket.room];
-		if (text != '') io.sockets.in(socket.room).emit('message', socket.name + ': ' + text);
+		if (text.length > 240) socket.emit('message', 'SYSTEM: Messages must be 240 characters or less.');
+		else if (text != '') io.sockets.in(socket.room).emit('message', socket.name + ': ' + text);
 	});
 	
 	//Start the game if the host requests to start. If another player tries to start, don't do anything.

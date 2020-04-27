@@ -13,6 +13,3 @@ Node.JS / NPM
 Express Framework
 Socket.IO Framework
 Heroku
-
--- Notes to test on localhost:8080 --
-"npm start" or "npm dev" in cmd bash in dir "C:\Users\Sam\Desktop\cati\server" to test server.

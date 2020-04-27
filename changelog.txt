@@ -239,3 +239,10 @@ Apr 27, 2020 Update 2: (Release Candidate 2)
 Major project restructuring to prepare for app deployment on Heroku.
 
 ------------------------------------------------------------------
+Apr 27, 2020 Update 3: (Post-Release)
+
+Added limit to chat length.
+
+Changed some cards and fixed some typos.
+
+------------------------------------------------------------------
