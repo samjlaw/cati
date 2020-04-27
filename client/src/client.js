@@ -9,6 +9,7 @@ var players = [];
 var round_prompt = [];
 var winner_name = '';
 var game_over = false;
+var view_title = true;
 
 //Canvas context for drawing graphics.
 var canvas = document.querySelector('#card-screen');
@@ -35,9 +36,6 @@ const on_chat_submitted = (event) => {
 	}
 	else if (socket.name == null) {
 		socket.emit('name_set', text);
-	}
-	else if (text == '!start') {
-		socket.emit('start_game', text);
 	}
 	else {
 		socket.emit('message', text);
@@ -67,6 +65,57 @@ const on_card_submitted = (event) => {
 			break;
 	}
 	if (my_cards[i] != null) socket.emit('action', my_cards[i]);
+};
+
+//Start the game if the player is the host.
+const start_game = (event) => {
+	event.preventDefault();
+	socket.emit('start_game');
+};
+
+const leave_game = (event) => {
+	event.preventDefault();
+	socket.emit('leave_room');
+	document.querySelector('#start').style.visibility = 'hidden';
+	document.querySelector('#leave').style.visibility = 'hidden';
+	socket.room = null;
+	socket.name = null;
+	const title = document.querySelector('#leaderboard-title');
+	title.textContent = ''
+};
+
+//Wrap text so the black cards can have multiple lines.
+function wrap_text(txt, x, y, max_width, line_height) {
+    var words = txt.split(' ');
+    var line = '';
+	
+    for(var i = 0; i < words.length; i++) {
+		var new_line = line + words[i] + ' ';
+        var line_width = c.measureText(new_line).width;
+        if (line_width > max_width && i > 0) {
+			c.fillText(line, x, y);
+			line = words[i] + ' ';
+			y += line_height;
+		}
+		else {
+			line = new_line;
+		}
+	}
+	c.fillText(line, x, y);
+}
+
+//Render the title screen when the player first joins.
+function display_title_screen() {
+	//Card
+	c.fillStyle = 'black';
+	c.fillRect(canvas.width/2-canvas.width/10, canvas.height/2-canvas.height*.4, canvas.width/5, canvas.height/2);
+	//Welcome message
+	c.font = (canvas.width*1.5/100) + 'px Arial';
+	c.fillStyle = 'white';
+	wrap_text('Welcome to this _____ game!', canvas.width/2-canvas.width/10+canvas.width/200, canvas.height/2-canvas.height*.35, canvas.width/5, canvas.width*1.5/80);
+	//Logo
+	c.font = (canvas.width/100) + 'px Arial';
+	c.fillText('Cards Against the Internet', canvas.width/2-canvas.width/10+canvas.width/200, canvas.height/2+canvas.height/12);
 }
 
 //Render Black Card, List of players, and their submission status.
@@ -75,18 +124,17 @@ function create_game_view(current_prompt, player_status) {
 	c.fillStyle = 'black';
 	c.fillRect(canvas.width/2-canvas.width/10, canvas.height/2-canvas.height*.4, canvas.width/5, canvas.height/2);
 	//Cue
-	c.font = (canvas.width/100 * 1.5) + 'px Arial';
+	c.font = (canvas.width*1.5/100) + 'px Arial';
 	c.fillStyle = 'white';
-	c.textAlign = 'center';
-	c.fillText(current_prompt.cue, canvas.width/2, canvas.height/2-100)
+	wrap_text(current_prompt.cue, canvas.width/2-canvas.width/10+canvas.width/200, canvas.height/2-canvas.height*.35, canvas.width/5, canvas.width*1.5/80);
 	//Logo
 	c.font = (canvas.width/100) + 'px Arial';
-	c.fillText('Cards Against the Internet', canvas.width/2-canvas.width/30, canvas.height/2+canvas.height/12);
+	c.fillText('Cards Against the Internet', canvas.width/2-canvas.width/10+canvas.width/200, canvas.height/2+canvas.height/12);
 	//Judge Name
 	c.font = (canvas.width/100 * 2) + 'px Arial';
 	c.fillStyle = 'black';
-	c.textAlign = 'center';
-	c.fillText('Judge - ' + current_prompt.judge, canvas.width/2, canvas.height/15);
+	var judge_txt = 'Judge - ' + current_prompt.judge;
+	c.fillText(judge_txt, canvas.width/2 - c.measureText(judge_txt).width/2, canvas.height/15);
 	
 	//Player Status and Names
 	for (let i = 0; i < player_status.length; i++) {
@@ -110,8 +158,7 @@ function create_game_view(current_prompt, player_status) {
 		//Player Name
 		c.font = (canvas.width/100 * 2) + 'px Arial';
 		c.fillStyle = 'black';
-		c.textAlign = 'center';
-		c.fillText(player_status[i].name, canvas.width/6 * (i+1), canvas.height/15*12);
+		c.fillText(player_status[i].name, canvas.width/6*(i+1) - c.measureText(player_status[i].name).width/2, canvas.height/15*12);
 	}
 }
 
@@ -119,8 +166,8 @@ function create_game_view(current_prompt, player_status) {
 function display_winner(name) {
 	c.font = (canvas.width/100 * 5) + 'px Arial';
 	c.fillStyle = 'black';
-	c.textAlign = 'center';
-	c.fillText(name + ' is the winner!!!', canvas.width/2, canvas.height/2);
+	var winner_txt = name + ' is the winner!!!';
+	c.fillText(winner_txt, canvas.width/2 - c.measureText(winner_txt).width/2, canvas.height/2);
 }
 
 //Create a deck of cards based on what is sent to the player from the server.
@@ -169,10 +216,20 @@ socket.on('clear_deck', (cards) => {
 		my_cards.splice(pos,1);
 	}
 	create_deck(my_cards);
-})
+});
+
+//Display the title screen.
+socket.on('title_screen', () => {
+	view_title = true;
+	c.clearRect(0, 0, canvas.width, canvas.height);
+	canvas.width = canvas.parentNode.clientWidth;
+	canvas.height = canvas.parentNode.clientHeight;
+	display_title_screen();
+});
 
 //Clear the canvas and redraw it whenever the canvas needs to be updated.
 socket.on('create_gameview', (current_prompt, player_status) => {
+	view_title = false;
 	c.clearRect(0, 0, canvas.width, canvas.height);
 	canvas.width = canvas.parentNode.clientWidth;
 	canvas.height = canvas.parentNode.clientHeight;
@@ -204,6 +261,18 @@ socket.on('player_update', (clients) => {
 	}
 });
 
+socket.on('show_start_button', () => {
+	document.querySelector('#start').style.visibility = 'visible';
+});
+
+socket.on('hide_start_button', () => {
+	document.querySelector('#start').style.visibility = 'hidden';
+});
+
+socket.on('show_leave_button', () => {
+	document.querySelector('#leave').style.visibility = 'visible';
+});
+
 //Default message upon first joining.
 write_chat('SYSTEM: Hello, welcome to Cards Against the Internet!');
 write_chat('SYSTEM: Please enter a 4-character room code. You may join an existing room or create your own.')
@@ -217,10 +286,18 @@ document.querySelector('#c3').addEventListener('click', on_card_submitted);
 document.querySelector('#c4').addEventListener('click', on_card_submitted);
 document.querySelector('#c5').addEventListener('click', on_card_submitted);
 
+document.querySelector('#start').addEventListener('click', start_game);
+document.querySelector('#leave').addEventListener('click', leave_game);
+
 //Resive Canvas when window changes size.
 window.addEventListener("resize", resizeCanvas, false);
 function resizeCanvas(e) {
-	if (!game_over) {
+	if (view_title) {
+		canvas.width = canvas.parentNode.clientWidth;
+		canvas.height = canvas.parentNode.clientHeight;
+		display_title_screen();
+	}
+	else if (!game_over) {
 		canvas.width = canvas.parentNode.clientWidth;
 		canvas.height = canvas.parentNode.clientHeight;
 		if (round_prompt.judge != null && round_prompt.cue != '') {

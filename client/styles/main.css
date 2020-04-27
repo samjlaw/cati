@@ -109,7 +109,10 @@ button:hover {
 }
 
 .card-input {
+	margin: 0 15%;
 	text-align: center;
+	width: 90vw;
+	vertical-align: middle;
 }
 
 .card-input button {
@@ -120,5 +123,15 @@ button:hover {
 	margin: 3vh;
 	display: inline-block;
 	font-size: 1vw;
+	visibility: hidden;
+	float: left;
+}
+
+.start-leave-game {
+	float: right;
+}
+
+.start-leave-game button {
+	font-size: .75vw;
 	visibility: hidden;
 }

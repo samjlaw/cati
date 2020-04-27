@@ -170,7 +170,7 @@ Fixed an issue that caused a server crash when a room would become empty after t
 Fixed an issue that caused a server crash when the game attempted to pick a player that previously left the room as the next judge.
 
 ------------------------------------------------------------------
-Apr 26, 2020:
+Apr 26, 2020 Update 1:
 
 Added more canvas graphics.
 	All non-judge players now show up on canvas during the round.
@@ -184,5 +184,34 @@ Improved functionality for continuing games after people leave the room.
 Fixed an issue where a game would have no winner if nobody won any points.
 
 Minor code consistency cleanup.
+
+------------------------------------------------------------------
+Apr 26, 2020 Update 2:
+
+Added buttons in client view to leave room and start game.
+	Only the host of the game can start game.
+	This also removes the need to type a message in chat to start the game.
+	Leaving the room does the same thing as disconnecting from the server entirely , but allows the player to easily rejoin a new room without having to reconnect.
+	
+Added title screen graphics. It appears when you first join the server and when you leave a room.
+
+Added text wrapping for black cards, so the cues can be written on multiple lines.
+	
+The server now selects the next connected player to become the host if the current host leaves.
+	
+Players now technically join the room after they enter their name, instead of their room code. This fixes a few issues involving calculating the number of players before the game starts.
+	If a room becomes ineligible to join after the player enters a room code but before they enter their name, they will be forced to enter a new room code after attempting to enter their name.
+	
+Players can now start a new game in the same room if they play a game to completion.
+
+Cards are now given to players when the game starts, rather than when they join a room.
+	
+The game now starts a new round with the same prompt if the judge leaves in the middle of a round.
+	
+Fixed an issue where players leaving before the game started would be treated as if the game were actually happening.
+
+Fixed an issue where the game would declare a winner twice if all but one person left after the game ended.
+
+Fixed an issue that caused a server crash when the host started a game without setting their name first.
 
 ------------------------------------------------------------------
