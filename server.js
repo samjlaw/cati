@@ -506,4 +506,9 @@ io.sockets.on('connection', (socket) => {
 			on_disconnect(socket.room, socket.name, socket.id, socket.host);
 		}
 	});
+	
+	//Properly close server on Ctrl-C
+	socket.on('SIGINT', () => {
+		process.exit(1);
+	});
 });
